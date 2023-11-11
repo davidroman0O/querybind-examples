@@ -1,0 +1,20 @@
+
+<ul>
+{{range .GenresSelected}}
+    <li hx-get="/remove?genre={{.}}" hx-target="#movie-list" hx-indicator="#loading" name="genre">{{.}}</li>
+{{end}}
+</ul>
+<ul>
+{{range .YearsSelected}}
+    <li hx-get="/remove?year={{.}}" hx-target="#movie-list" hx-indicator="#loading" name="year">{{.}}</li>
+{{end}}
+</ul>
+
+
+{{range .Movies}}
+<div>
+    <h2>{{.Title}}</h2>
+    <p>Genre: {{.Genre}}, Year: {{.Year}}, Rating: {{.Rating}}</p>
+</div>
+{{end}}
+

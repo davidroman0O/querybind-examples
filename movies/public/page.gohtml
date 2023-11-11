@@ -1,0 +1,23 @@
+<div>
+    <select hx-get="/filter" hx-target="#movie-list" hx-indicator="#loading" name="genre" >
+        <option value="">Select Genre</option>
+        {{range .Genres}}
+            <option value="{{.}}">{{.}}</option>
+        {{end}}
+
+        
+    </select>
+
+    <select hx-get="/filter" hx-target="#movie-list" hx-indicator="#loading" name="year" >
+        <option value="">Select Year</option>
+        {{range .Years}}
+            <option value="{{.}}">{{.}}</option>
+        {{end}}
+    </select>
+</div>
+
+<div id="movie-list">
+    {{template "list" .}}
+</div>
+
+<div id="loading" style="display: none;">Loading...</div>
