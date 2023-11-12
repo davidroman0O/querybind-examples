@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
 	"os"
 
@@ -150,8 +149,6 @@ func main() {
 			// Handle error, could return HTTP 400 Bad Request
 			return c.Status(fiber.StatusBadRequest).SendString("Invalid query parameters")
 		}
-
-		fmt.Println(year, genre)
 
 		if len(genre) != 0 {
 			params.Genres = removeElement(params.Genres, genre)

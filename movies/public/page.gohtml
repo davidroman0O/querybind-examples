@@ -1,6 +1,8 @@
+
 {{ $genres := .Genres }}
 {{ $selectedGenres := .GenresSelected }}
 {{ $filteredGenres := filterStrings $genres $selectedGenres }}
+
 {{ $years := .Years }}
 {{ $selectedYears := .YearsSelected }}
 {{ $filteredYears := filterStrings $years $selectedYears }}
@@ -58,6 +60,7 @@
     function optionExists(selectElement, value) {
         return Array.from(selectElement.options).some(option => option.value === value);
     }
+
     function addNewButton(value, paramName, targetUlId, buttonId) {
         var ul = document.getElementById(targetUlId);
         var button = document.createElement('button');
@@ -147,4 +150,5 @@
             }
         });
     });
+
 </script>
