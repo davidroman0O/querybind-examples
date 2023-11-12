@@ -52,6 +52,23 @@ type QueryParams struct {
 	Years  []string `querybind:"years"`
 }
 
+func filterStrings(allStrings, selectedStrings []string) []string {
+	filtered := []string{}
+	selectedMap := make(map[string]bool)
+
+	for _, str := range selectedStrings {
+		selectedMap[str] = true
+	}
+
+	for _, str := range allStrings {
+		if !selectedMap[str] {
+			filtered = append(filtered, str)
+		}
+	}
+
+	return filtered
+}
+
 func main() {
 	app := fiber.New()
 
@@ -65,6 +82,8 @@ func main() {
 		engine.Debug(true)
 		engine.Reload(true)
 	}
+
+	engine.AddFunc("filterStrings", filterStrings)
 
 	// Pass the engine to the Views
 	app = fiber.New(fiber.Config{
@@ -103,12 +122,10 @@ func main() {
 			return c.Status(fiber.StatusBadRequest).SendString("Invalid query parameters")
 		}
 
-		fmt.Println(genre, year)
-
-		if len(genre) != 0 {
+		if len(genre) != 0 && !contains(params.Genres, genre) {
 			params.Genres = append(params.Genres, genre)
 		}
-		if len(year) != 0 {
+		if len(year) != 0 && !contains(params.Years, year) {
 			params.Years = append(params.Years, year)
 		}
 
@@ -134,7 +151,7 @@ func main() {
 			return c.Status(fiber.StatusBadRequest).SendString("Invalid query parameters")
 		}
 
-		fmt.Println(genre, year)
+		fmt.Println(year, genre)
 
 		if len(genre) != 0 {
 			params.Genres = removeElement(params.Genres, genre)
@@ -257,4 +274,13 @@ func removeElement(slice []string, value string) []string {
 		}
 	}
 	return slice // return the original slice if the value is not found
+}
+
+func contains(s []string, e string) bool {
+	for _, a := range s {
+		if a == e {
+			return true
+		}
+	}
+	return false
 }

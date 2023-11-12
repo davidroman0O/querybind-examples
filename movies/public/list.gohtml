@@ -1,20 +1,35 @@
 
 <ul>
-{{range .GenresSelected}}
-    <li hx-get="/remove?genre={{.}}" hx-target="#movie-list" hx-indicator="#loading" name="genre">{{.}}</li>
-{{end}}
+    {{range .GenresSelected}}
+        <button 
+            hx-get="/remove?genre={{.}}" 
+            data-value={{.}} 
+            hx-target="#movie-list" 
+            hx-indicator="#loading" 
+            data-action="removeGenre"
+            id="removeGenre" 
+            name="genre">{{.}}</button>
+    {{end}}
 </ul>
+
 <ul>
-{{range .YearsSelected}}
-    <li hx-get="/remove?year={{.}}" hx-target="#movie-list" hx-indicator="#loading" name="year">{{.}}</li>
-{{end}}
+    {{range .YearsSelected}}
+        <button 
+            hx-get="/remove?year={{.}}" 
+            data-value={{.}} 
+            hx-target="#movie-list" 
+            hx-indicator="#loading" 
+            data-action="removeYear"
+            id="removeYear" 
+            name="year">{{.}}</button>
+    {{end}}
 </ul>
 
 
 {{range .Movies}}
-<div>
-    <h2>{{.Title}}</h2>
-    <p>Genre: {{.Genre}}, Year: {{.Year}}, Rating: {{.Rating}}</p>
-</div>
+    <div>
+        <h2>{{.Title}}</h2>
+        <p>Genre: {{.Genre}}, Year: {{.Year}}, Rating: {{.Rating}}</p>
+    </div>
 {{end}}
 

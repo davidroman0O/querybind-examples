@@ -1,16 +1,20 @@
+{{ $genres := .Genres }}
+{{ $selectedGenres := .GenresSelected }}
+{{ $filteredGenres := filterStrings $genres $selectedGenres }}
+{{ $years := .Years }}
+{{ $selectedYears := .YearsSelected }}
+{{ $filteredYears := filterStrings $years $selectedYears }}
+
 <div>
-    <select hx-get="/filter" hx-target="#movie-list" hx-indicator="#loading" name="genre" >
+    <select hx-get="/filter" hx-target="#movie-list" hx-indicator="#loading" name="genre" id="genre" >
         <option value="">Select Genre</option>
-        {{range .Genres}}
+        {{range $filteredGenres}}
             <option value="{{.}}">{{.}}</option>
         {{end}}
-
-        
     </select>
-
-    <select hx-get="/filter" hx-target="#movie-list" hx-indicator="#loading" name="year" >
+    <select hx-get="/filter" hx-target="#movie-list" hx-indicator="#loading" name="year" id="year" >
         <option value="">Select Year</option>
-        {{range .Years}}
+        {{range $filteredYears}}
             <option value="{{.}}">{{.}}</option>
         {{end}}
     </select>
@@ -21,3 +25,45 @@
 </div>
 
 <div id="loading" style="display: none;">Loading...</div>
+
+<script>
+    //  Still require some vanilla JS to easily move things around as reponse of those events
+     document.addEventListener('DOMContentLoaded', function() {
+        console.log("Script Loaded");
+
+        document.body.addEventListener('htmx:configRequest', function(event) {
+            event.detail.parameters.target = event.target
+        });
+
+        document.body.addEventListener('htmx:afterRequest', function(event) {
+            if (event.detail.xhr.status === 200) {
+
+                if (event.target.id === 'genre') {
+                    var selectElement = document.getElementById('genre');
+                    selectElement.remove(selectElement.selectedIndex);
+                    document.getElementById('genre').selectedIndex = 0;
+                }
+                
+                if (event.target.id === 'year') {
+                    var selectElement = document.getElementById('year');
+                    selectElement.remove(selectElement.selectedIndex);
+                    document.getElementById('year').selectedIndex = 0;
+                }
+                
+                // have to search it from the main requestConfig
+                if (event.detail.requestConfig.parameters.target.id === 'removeYear') {
+                    var value = event.detail.requestConfig.parameters.target.getAttribute('data-value');
+                    var newOption = new Option(value, value);
+                    document.getElementById('year').appendChild(newOption);
+                }
+
+                // have to search it from the main requestConfig
+                if (event.detail.requestConfig.parameters.target.id === 'removeGenre') {
+                    var value = event.detail.requestConfig.parameters.target.getAttribute('data-value');
+                    var newOption = new Option(value, value);
+                    document.getElementById('genre').appendChild(newOption);
+                }
+            }
+        });
+    });
+</script>
