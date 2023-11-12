@@ -1,29 +1,4 @@
 
-<ul>
-    {{range .GenresSelected}}
-        <button 
-            hx-get="/remove?genre={{.}}" 
-            data-value={{.}} 
-            hx-target="#movie-list" 
-            hx-indicator="#loading" 
-            data-action="removeGenre"
-            id="removeGenre" 
-            name="genre">{{.}}</button>
-    {{end}}
-</ul>
-
-<ul>
-    {{range .YearsSelected}}
-        <button 
-            hx-get="/remove?year={{.}}" 
-            data-value={{.}} 
-            hx-target="#movie-list" 
-            hx-indicator="#loading" 
-            data-action="removeYear"
-            id="removeYear" 
-            name="year">{{.}}</button>
-    {{end}}
-</ul>
 
 
 {{range .Movies}}

@@ -6,18 +6,45 @@
 {{ $filteredYears := filterStrings $years $selectedYears }}
 
 <div>
+    
     <select hx-get="/filter" hx-target="#movie-list" hx-indicator="#loading" name="genre" id="genre" >
         <option value="">Select Genre</option>
         {{range $filteredGenres}}
             <option value="{{.}}">{{.}}</option>
         {{end}}
     </select>
+    <ul id="selectedGenres">
+        {{range .GenresSelected}}
+            <button 
+                hx-get="/remove?genre={{.}}" 
+                data-value={{.}} 
+                hx-target="#movie-list" 
+                hx-indicator="#loading" 
+                data-action="removeGenre"
+                id="removeGenre" 
+                name="genre">{{.}}</button>
+        {{end}}
+    </ul>
+
     <select hx-get="/filter" hx-target="#movie-list" hx-indicator="#loading" name="year" id="year" >
         <option value="">Select Year</option>
         {{range $filteredYears}}
             <option value="{{.}}">{{.}}</option>
         {{end}}
     </select>
+    <ul id="selectedYears">
+        {{range .YearsSelected}}
+            <button 
+                hx-get="/remove?year={{.}}" 
+                data-value={{.}} 
+                hx-target="#movie-list" 
+                hx-indicator="#loading" 
+                data-action="removeYear"
+                id="removeYear" 
+                name="year">{{.}}</button>
+        {{end}}
+    </ul>
+
 </div>
 
 <div id="movie-list">
@@ -27,9 +54,60 @@
 <div id="loading" style="display: none;">Loading...</div>
 
 <script>
+
+    function optionExists(selectElement, value) {
+        return Array.from(selectElement.options).some(option => option.value === value);
+    }
+    function addNewButton(value, paramName, targetUlId, buttonId) {
+        var ul = document.getElementById(targetUlId);
+        var button = document.createElement('button');
+        button.setAttribute('hx-get', '/remove?' + paramName + '=' + encodeURIComponent(value));
+        button.setAttribute('data-value', value);
+        button.setAttribute('hx-target', '#movie-list');
+        button.setAttribute('hx-indicator', '#loading');
+        button.setAttribute('data-action', buttonId);
+        button.setAttribute('id', buttonId);
+        button.setAttribute('name', paramName);
+        button.textContent = value;
+        ul.appendChild(button);
+        // Process the newly added button with htmx
+        if (window.htmx) {
+            window.htmx.process(button);
+        }
+    }
+
+    function removeButton(value, ulId) {
+        var ul = document.getElementById(ulId);
+        var buttons = ul.getElementsByTagName('button');
+        for (var i = 0; i < buttons.length; i++) {
+            if (buttons[i].getAttribute('data-value') === value) {
+                ul.removeChild(buttons[i]);
+                break; // Assuming only one button with this value
+            }
+        }
+    }
+
     //  Still require some vanilla JS to easily move things around as reponse of those events
      document.addEventListener('DOMContentLoaded', function() {
         console.log("Script Loaded");
+            
+        var genreSelect = document.getElementById('genre');
+        var yearSelect = document.getElementById('year');
+
+        
+        genreSelect.addEventListener('change', function() {
+            var selectedValue = this.value;
+            if (selectedValue) {
+                addNewButton(selectedValue, 'genre', 'selectedGenres', 'removeGenre');
+            }
+        });
+
+        yearSelect.addEventListener('change', function() {
+            var selectedValue = this.value;
+            if (selectedValue) {
+                addNewButton(selectedValue, 'year', 'selectedYears', 'removeYear');
+            }
+        });
 
         document.body.addEventListener('htmx:configRequest', function(event) {
             event.detail.parameters.target = event.target
@@ -37,6 +115,7 @@
 
         document.body.addEventListener('htmx:afterRequest', function(event) {
             if (event.detail.xhr.status === 200) {
+                var actionSource = event.detail.requestConfig.parameters.target;
 
                 if (event.target.id === 'genre') {
                     var selectElement = document.getElementById('genre');
@@ -50,19 +129,21 @@
                     document.getElementById('year').selectedIndex = 0;
                 }
                 
-                // have to search it from the main requestConfig
-                if (event.detail.requestConfig.parameters.target.id === 'removeYear') {
-                    var value = event.detail.requestConfig.parameters.target.getAttribute('data-value');
-                    var newOption = new Option(value, value);
-                    document.getElementById('year').appendChild(newOption);
+                // Check if the action is from a removal button
+                if (actionSource.id === 'removeYear' || actionSource.id === 'removeGenre') {
+                    var value = actionSource.getAttribute('data-value');
+                    var selectElement = actionSource.id === 'removeYear' ? document.getElementById('year') : document.getElementById('genre');
+
+                    // Remove the button
+                    removeButton(value, actionSource.id === 'removeYear' ? 'selectedYears' : 'selectedGenres');
+
+                    // Append a new option only if it does not already exist
+                    if (!optionExists(selectElement, value)) {
+                        var newOption = new Option(value, value);
+                        selectElement.appendChild(newOption);
+                    }
                 }
 
-                // have to search it from the main requestConfig
-                if (event.detail.requestConfig.parameters.target.id === 'removeGenre') {
-                    var value = event.detail.requestConfig.parameters.target.getAttribute('data-value');
-                    var newOption = new Option(value, value);
-                    document.getElementById('genre').appendChild(newOption);
-                }
             }
         });
     });
